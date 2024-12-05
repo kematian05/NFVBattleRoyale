@@ -48,5 +48,5 @@ Vusat (Kematian) Orujov
 
 
 ## Screenshots
-![image](https://github.com/user-attachments/assets/78a043b9-d386-4c1a-b561-8ca8fe5dec76)
+![image](https://pasteboard.co/YdcBIoiSBLHd.jpg)
 ![image](https://github.com/user-attachments/assets/8fa8273b-9ac3-49f1-a595-aeb21ec3fc53)
