@@ -5,7 +5,7 @@ SERVER_PORT = 3169
 
 def create_client_socket():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = 'localhost'  # Server's IP
+    host = '0.0.0.0'  # Server's IP
     port = SERVER_PORT  # Server's port
     client_socket.connect((host, port))
     print("Connected to the server")

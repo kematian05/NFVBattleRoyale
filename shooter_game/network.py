@@ -5,7 +5,7 @@ SERVER_PORT = 3169
 
 def create_client_socket():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = 'localhost'  # Server's IP
+    host = '172.20.10.3'  # Server's IP
     port = SERVER_PORT  # Server's port
     client_socket.connect((host, port))
     print("Connected to the server")
@@ -25,7 +25,7 @@ def connect_to_game_server(player_id, weapon):
     # connect to server
     client_socket = create_client_socket()
     # PLAY REQUEST
-    client_socket.sendall(json.dumps({"action": "play", "id": player_id, "weapon": weapon}).encode('utf-8'))
+    client_socket.sendall((json.dumps({"action": "play", "id": player_id, "weapon": weapon}) + "\t").encode('utf-8'))
     # PLAY RESPONSE
     response = client_socket.recv(1024).decode('utf-8')
     if (response != "200"):

@@ -43,83 +43,89 @@ def run_server():
         client_id : str = ""
         while True:
             data = client_socket.recv(4096)
+            print("received data!")
             if not data:
                 break
-            try:
-                updated_state = json.loads(data.decode('utf-8'))
-                if (updated_state['action'] == 'play'):
-                    client_id = updated_state['id']
-                    all_players[client_id] = {
-                        "id": client_id,
-                        "x": MapConfig.map_width // 4, # START AT THE CENTRE X
-                        "y": MapConfig.map_height // 4, # START AT THE CENTRE Y
-                        "health": 100,
-                        "armor": 100,
-                        "bullets_left": GameConfig.get_bullet_count(updated_state['weapon']),
-                        "reloading": False,
-                        "healing": False,
-                        "weapon": "pistol",
-                        "reload_start_time": None,
-                        "healing_start_time": None,
-                        "color": ColorPalette.GREEN,
-                        "gun_length": 40,
-                        "score": 0,
-                        "alive": True  # Track if the player is alive
-                    }
-                    client_socket.sendall("200".encode('utf-8'))
-                    print(f"Client connection complete, id: {client_id}")
-                    this_player = all_players[client_id]
-                    # push game state continuously once joined
-                    threading.Thread(target=send_game_state, args=(client_socket,)).start()
-                elif (updated_state['action'] == 'player_position'):
-                    this_player['x'] = updated_state['x']
-                    this_player['y'] = updated_state['y']
-                    this_player['reload_start_time'] = updated_state['reload_start_time']
-                    this_player['healing_start_time'] = updated_state['healing_start_time']
-                    this_player['reloading'] = updated_state['reloading']
-                    this_player['healing'] = updated_state['healing']
-                    this_player['bullets_left'] = updated_state['bullets_left']
-                    this_player['weapon'] = updated_state['weapon']
-                    this_player['health'] = updated_state['health']
-                    # this_player['armor'] = updated_state['armor']
-                    print(f"Received position data: {updated_state}")
-                elif (updated_state['action'] == "bullet_fired"):
-                    # {"x": bullet_start_x, "y": bullet_start_y, "angle": player1_angle, "distance_traveled": 0}
-                    bullets[client_id] = updated_state['data']
-                    # bullets[client_id]['x'] = updated_state['x']
-                    # bullets[client_id]['y'] = updated_state['y']
-                    # bullets[client_id]['angle'] = updated_state['angle']
-                    # bullets[client_id]['distance_traveled'] = updated_state['distance_traveled']
-                    # this_player['bullets_left'] -= 1
-                    print(f"Received bullet data: {updated_state}")
-                elif (updated_state['action'] == 'flag_score'):
-                    # increase score
-                    all_players[client_id]['score'] += 10
-                    print(f"Received flag score: {updated_state}")
-                elif (updated_state['action'] == "bullet_hit"):
-                    damage = updated_state['damage']
-                    # increase score
-                    all_players[client_id]['score'] += damage
-                    # damage player
-                    target = all_players[updated_state['target_id']]
-                    if target["armor"] > 0:
-                        target["armor"] -= damage
-                        if target["armor"] < 0:
-                            target["health"] += target["armor"]
-                            target["armor"] = 0
-                    else: target["health"] -= damage
-                    # check damaged player:
-                    if target["health"] <= 0:
-                        target["alive"] = False
-                        time.sleep(0.1)
-                        # clean up everything related to the player
-                        del all_players[updated_state['target_id']]
-                        del bullets['target_id']
-                    print(f"Received hit data: {updated_state}")
-            # except JSONDecodeError:
-            #     print("went wrong!")
-            except Exception as e:
-                print(f"Went wrong: {e}")
+            print("received data is not empty!")
+            print("data: ", data.decode('utf-8'))
+            for data_part in data.decode('utf-8').split('\t')[:-1]:
+                try:
+                    print(f"data part: {data_part}")
+                    updated_state = json.loads(data_part)
+                    print(f"Received: {updated_state}")
+                    if (updated_state['action'] == 'play'):
+                        client_id = updated_state['id']
+                        all_players[client_id] = {
+                            "id": client_id,
+                            "x": 20, # START AT THE CENTRE X
+                            "y": 20 * MapConfig.one_height_unit, # START AT THE CENTRE Y
+                            "health": 100,
+                            "armor": 100,
+                            "bullets_left": GameConfig.get_bullet_count(updated_state['weapon']),
+                            "reloading": False,
+                            "healing": False,
+                            "weapon": "pistol",
+                            "reload_start_time": None,
+                            "healing_start_time": None,
+                            "color": ColorPalette.GREEN,
+                            "gun_length": 40,
+                            "score": 0,
+                            "alive": True  # Track if the player is alive
+                        }
+                        client_socket.sendall("200".encode('utf-8'))
+                        print(f"Client connection complete, id: {client_id}")
+                        this_player = all_players[client_id]
+                        # push game state continuously once joined
+                        threading.Thread(target=send_game_state, args=(client_socket,)).start()
+                    elif (updated_state['action'] == 'player_position'):
+                        this_player['x'] = updated_state['x']
+                        this_player['y'] = updated_state['y']
+                        this_player['reload_start_time'] = updated_state['reload_start_time']
+                        this_player['healing_start_time'] = updated_state['healing_start_time']
+                        this_player['reloading'] = updated_state['reloading']
+                        this_player['healing'] = updated_state['healing']
+                        this_player['bullets_left'] = updated_state['bullets_left']
+                        this_player['weapon'] = updated_state['weapon']
+                        this_player['health'] = updated_state['health']
+                        # this_player['armor'] = updated_state['armor']
+                        print(f"Received position data: {updated_state}")
+                    elif (updated_state['action'] == "bullet_fired"):
+                        # {"x": bullet_start_x, "y": bullet_start_y, "angle": player1_angle, "distance_traveled": 0}
+                        bullets[client_id] = updated_state['data']
+                        # bullets[client_id]['x'] = updated_state['x']
+                        # bullets[client_id]['y'] = updated_state['y']
+                        # bullets[client_id]['angle'] = updated_state['angle']
+                        # bullets[client_id]['distance_traveled'] = updated_state['distance_traveled']
+                        # this_player['bullets_left'] -= 1
+                        print(f"Received bullet data: {updated_state}")
+                    elif (updated_state['action'] == 'flag_score'):
+                        # increase score
+                        all_players[client_id]['score'] += 10
+                        print(f"Received flag score: {updated_state}")
+                    elif (updated_state['action'] == "bullet_hit"):
+                        damage = updated_state['damage']
+                        # increase score
+                        all_players[client_id]['score'] += damage
+                        # damage player
+                        target = all_players[updated_state['target_id']]
+                        if target["armor"] > 0:
+                            target["armor"] -= damage
+                            if target["armor"] < 0:
+                                target["health"] += target["armor"]
+                                target["armor"] = 0
+                        else: target["health"] -= damage
+                        # check damaged player:
+                        if target["health"] <= 0:
+                            target["alive"] = False
+                            time.sleep(0.1)
+                            # clean up everything related to the player
+                            del all_players[updated_state['target_id']]
+                            del bullets['target_id']
+                        print(f"Received hit data: {updated_state}")
+                # except JSONDecodeError:
+                #     print("went wrong!")
+                except Exception as e:
+                    print(f"Went wrong: {e}")
 
 
     def client_handler(client_socket):

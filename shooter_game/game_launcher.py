@@ -58,8 +58,8 @@ def launch_game(this_player_id, selected_weapon):
     # Initialize current player
     current_player = {
         "id": this_player_id,
-        "x": 60,  # START AT THE CENTRE X
-        "y": 50 * MapConfig.one_height_unit,  # START AT THE CENTRE Y
+        "x": 20,  # START AT THE CENTRE X
+        "y": 20 * MapConfig.one_height_unit,  # START AT THE CENTRE Y
         "health": 100,
         "armor": 100,
         "weapon": selected_weapon,
@@ -96,7 +96,7 @@ def launch_game(this_player_id, selected_weapon):
 
         while is_active:
             # receive request
-            data = client_socket.recv(4096)
+            data = client_socket.recv(1024)
             # print(f"Received full data: {data}")
             # populate all players
             if not data: break
@@ -282,7 +282,7 @@ def launch_game(this_player_id, selected_weapon):
                             target["alive"] = False
                         # bullet can only hit one player, so break checking if it hits anyone else
                         client_socket.sendall(
-                            json.dumps({"action": "bullet_hit", "target_id": target['id'], 'damage': GameConfig.get_bullet_damage(selected_weapon)}).encode(
+                            (json.dumps({"action": "bullet_hit", "target_id": target['id'], 'damage': GameConfig.get_bullet_damage(selected_weapon)}) + "\t").encode(
                                 'utf-8'))
                         break
                     # If bullet did not hit any player yet
@@ -375,8 +375,8 @@ def launch_game(this_player_id, selected_weapon):
                 if(player['healing']):
                     # Draw reloading text below the player circle
                     name_surface = pygame.font.Font(None, 18).render("Healing...", True, color)
-                    window.blit(name_surface, (int(current_player["x"] - camera_x) - name_surface.get_width() // 2,
-                                           int(current_player["y"] - camera_y) + GameConfig.get_player_radius(selected_weapon) + 12))
+                    window.blit(name_surface, (int(player["x"] - camera_x) - name_surface.get_width() // 2,
+                                           int(player["y"] - camera_y) + GameConfig.get_player_radius(selected_weapon) + 12))
 
         # Draw own bullets
         for bullet in own_bullets:
@@ -426,7 +426,7 @@ def launch_game(this_player_id, selected_weapon):
         # print(f"LAST: {last_sent_player_position_state}, CURRENT: {player_position_state}, ARE EQUAL: {last_sent_player_position_state == player_position_state}")
         if last_sent_player_position_state != player_position_state:
             # SEND POSITION DATA TO SERVER
-            client_socket.sendall(player_position_state.encode('utf-8'))
+            client_socket.sendall((player_position_state + "\t").encode('utf-8'))
             last_sent_player_position_state = player_position_state
             # print(f"player position updated: {last_sent_player_position_state}")
         # else:
@@ -437,7 +437,7 @@ def launch_game(this_player_id, selected_weapon):
         if last_sent_bullet_state != bullet_state:
             # SEND BULLET DATA TO SERVER
             # print("BULLET DATA SENT TO SERVER!")
-            client_socket.sendall(bullet_state.encode('utf-8'))
+            client_socket.sendall((bullet_state + "\t").encode('utf-8'))
             last_sent_bullet_state = bullet_state
 
         # Update display
