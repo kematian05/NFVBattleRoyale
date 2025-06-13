@@ -15,7 +15,7 @@ def create_server_socket():
     # create a tcp server socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    host = '0.0.0.0'  # all interfaces
+    host = '127.0.0.1'  # localhost interface
     s.bind((host, SERVER_PORT))  # Tell OS to forward these packets to our socket
     s.listen(5)  # Backlog of 5 connections, after 5 are in queue, the rest will be refused
     print(f"Started listening on {host}:{SERVER_PORT}")
